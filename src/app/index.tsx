@@ -1,5 +1,8 @@
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -10,8 +13,12 @@ import {
 import { ReportCard } from "../components/ReportCard";
 import { TechnicianCard } from "../components/TechnicianCard";
 
+// Clave única para identificar los datos guardados en el disco local
+const STORAGE_KEY = "@campusservice_report_status_bs02";
+
 export default function App() {
   const [isResolved, setIsResolved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const reportData = {
     title: "Cortocircuito en Laboratorio BS02",
@@ -29,9 +36,49 @@ export default function App() {
     avatarUrl: "https://i.pravatar.cc/150?img=12",
   };
 
-  const handleToggleStatus = () => {
-    setIsResolved(!isResolved);
+  // 1. CICLO DE VIDA: Cargar datos del almacenamiento interno al arrancar la app
+  useEffect(() => {
+    loadPersistedStatus();
+  }, []);
+
+  const loadPersistedStatus = async () => {
+    try {
+      const savedStatus = await AsyncStorage.getItem(STORAGE_KEY);
+      if (savedStatus !== null) {
+        setIsResolved(JSON.parse(savedStatus));
+      }
+    } catch (error) {
+      Alert.alert("Error de Carga", "No se pudo recuperar el estado previo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // 2. PERSISTENCIA: Guardar cambios de manera asíncrona al interactuar
+  const handleToggleStatus = async () => {
+    try {
+      const nextState = !isResolved;
+      setIsResolved(nextState);
+
+      // Guardar el valor booleano serializado como string en la memoria física
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    } catch (error) {
+      Alert.alert(
+        "Error de Guardado",
+        "No se pudo guardar el cambio en el teléfono.",
+      );
+    }
+  };
+
+  // Pantalla de carga (mientras lee la memoria persistente)
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color="#0284c7" />
+        <Text style={styles.loadingText}>Cargando datos locales...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -70,7 +117,9 @@ export default function App() {
           </Text>
 
           <TouchableOpacity style={styles.button} onPress={handleToggleStatus}>
-            <Text style={styles.buttonText}>Cambiar Estado del Reporte</Text>
+            <Text style={styles.buttonText}>
+              {isResolved ? "Marcar como Pendiente" : "Marcar como Resuelto"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -82,6 +131,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",
+  },
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    color: "#64748b",
+    fontSize: 14,
   },
   scrollContent: {
     padding: 20,
