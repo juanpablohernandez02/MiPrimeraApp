@@ -7,10 +7,23 @@ import {
 } from "react-native";
 import { TechnicianCard } from "../TechnicianCard";
 
-export default function TechnicianDetailScreen({ route, navigation }: any) {
-  // Desempaquetamos los parámetros enviados desde el emisor
-  const { name, role, phone, avatarUrl, isAssigned } = route.params || {};
+export interface TechnicianDetailScreenProps {
+    name?: string;
+    role?: string;
+    phone?: string;
+    avatarUrl?: string;
+    isAssigned?: boolean;
+    onBack: () => void;
+}
 
+export default function TechnicianDetailScreen({
+    name,
+    role,
+    phone,
+    avatarUrl,
+    isAssigned = false,
+    onBack,
+}: TechnicianDetailScreenProps) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -26,7 +39,7 @@ export default function TechnicianDetailScreen({ route, navigation }: any) {
 
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={onBack}
         >
           <Text style={styles.buttonText}>Volver a Reportes</Text>
         </TouchableOpacity>

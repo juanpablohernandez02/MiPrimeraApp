@@ -6,7 +6,7 @@ export interface TechnicianCardProps {
   name: string;
   role: string;
   phone: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   isAssigned: boolean;
 }
 

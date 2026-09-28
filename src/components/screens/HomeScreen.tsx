@@ -16,7 +16,11 @@ import { TechnicianCard } from "../TechnicianCard";
 // Clave única para identificar los datos guardados en el disco local
 const STORAGE_KEY = "@campusservice_report_status_bs02";
 
-export default function App() {
+export interface HomeScreenProps {
+  onGoToDashboard: () => void;
+}
+
+export default function HomeScreen({ onGoToDashboard }: HomeScreenProps) {
   const [isResolved, setIsResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -122,6 +126,13 @@ export default function App() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.dashboardButton}
+          onPress={onGoToDashboard}
+        >
+          <Text style={styles.dashboardButtonText}>Volver al dashboard</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -185,6 +196,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  dashboardButton: {
+    backgroundColor: "#64748b",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  dashboardButtonText: {
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "bold",
